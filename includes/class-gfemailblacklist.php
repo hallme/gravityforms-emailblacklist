@@ -326,4 +326,16 @@ class GFEmailBlacklist extends GFAddOn {
 		return strtolower( trim( $string ) );
 	}
 
+	/**
+	 * Return the plugin's icon for the plugin/form settings menu.
+	 *
+	 * @return string
+	 */
+	public function get_menu_icon() {
+
+		return file_get_contents( plugin_dir_url( __FILE__ ). '/assets/blacklist-icon.svg' );
+
+	}
+
+
 }
