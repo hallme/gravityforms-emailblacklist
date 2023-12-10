@@ -236,6 +236,11 @@ class GFEmailBlacklist extends GFAddOn {
 				$blacklist = $field['email_blacklist'];
 			}
 
+			// If the user entered 'none', skip.
+			if ( "none" === $this->gf_emailblacklist_clean( $blacklist ) ) {
+				continue;
+			}
+
 			// Get the domain from user entered email.
 			$email  = $this->gf_emailblacklist_clean( rgpost( "input_{$field['id']}" ) );
 			$domain = $this->gf_emailblacklist_clean( rgar( explode( '@', $email ), 1 ) );
