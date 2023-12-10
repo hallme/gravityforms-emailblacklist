@@ -230,21 +230,21 @@ class GFEmailBlacklist extends GFAddOn {
 				continue;
 			}
 
-			// Collect banned domains from backend and clean up.
+			// Collect blacklisted domains from backend and clean up.
 			$blacklist = $default_blacklist;
 			if ( ! empty( $field['email_blacklist'] ) ) { // collect per form settings.
 				$blacklist = $field['email_blacklist'];
 			}
 
-			// If the user entered 'none', skip.
-			if ( "none" === $this->gf_emailblacklist_clean( $blacklist ) ) {
+			// If the user entered "none", skip.
+			if ( 'none' === $this->gf_emailblacklist_clean( $blacklist ) ) {
 				continue;
 			}
 
 			// Get the domain from user entered email.
 			$email  = $this->gf_emailblacklist_clean( rgpost( "input_{$field['id']}" ) );
+			$user   = $this->gf_emailblacklist_clean( rgar( explode( '@', $email ), 0 ) );
 			$domain = $this->gf_emailblacklist_clean( rgar( explode( '@', $email ), 1 ) );
-			$tld    = strrchr( $domain, '.' );
 
 			/**
 			 * Filter to allow third party plugins short circuit blacklist validation.
@@ -253,19 +253,16 @@ class GFEmailBlacklist extends GFAddOn {
 			 * @param bool   false      Default value.
 			 * @param array  $field     The Field Object.
 			 * @param string $email     The email entered in the input.
-			 * @param string $domain    The full domain entered in the input.
-			 * @param string $tld       The top level domain entered in the input.
 			 * @param array  $blacklist List of the blocked emailed/domains.
 			 */
-			if ( apply_filters( 'gf_blacklist_validation_short_circuit', false, $field, $email, $domain, $tld, $blacklist ) ) {
+			if ( apply_filters( 'gf_blacklist_validation_short_circuit', false, $field, $email, $blacklist ) ) {
 				continue;
 			}
 
-			// Create array of banned domains.
+			// Create array of blacklisted emails/domains.
 			if ( ! is_array( $blacklist ) ) {
 				$blacklist = explode( ',', $blacklist );
 			}
-			$blacklist = str_replace( '*', '', $blacklist );
 			$blacklist = array_map( array( $this, 'gf_emailblacklist_clean' ), $blacklist );
 			$blacklist = array_filter( $blacklist );
 
@@ -274,8 +271,22 @@ class GFEmailBlacklist extends GFAddOn {
 				continue;
 			}
 
-			// if the email, domain or top-level domain isn't blacklisted, skip.
-			if ( ! in_array( $email, $blacklist, true ) && ! in_array( $domain, $blacklist, true ) && ! in_array( $tld, $blacklist, true ) ) {
+			// Search the array for matching blacklist parameters.
+			$blacklist_patterns = array_map( array($this, 'gf_emailblacklist_pattern' ), $blacklist );
+
+			// Remove periods from the username part of the email since they all point to the same email address
+			$user  = str_replace( '.', '', $user );
+			$email = $user . "@" . $domain;
+
+			// Check the email against each blacklist pattern.
+			foreach( $blacklist_patterns as &$pattern ) {
+				if ( preg_match( $pattern, $email, $blacklist_matches ) ) {
+					break;
+				}
+			}
+
+			// If the email has no blacklist matches, skip.
+			if( empty( $blacklist_matches ) ) {
 				continue;
 			}
 
@@ -286,11 +297,9 @@ class GFEmailBlacklist extends GFAddOn {
 			 * @param bool   false      Default value.
 			 * @param array  $field     The Field Object.
 			 * @param string $email     The email entered in the input.
-			 * @param string $domain    The full domain entered in the input.
-			 * @param string $tld       The top level domain entered in the input.
 			 * @param array  $blacklist List of the blocked emailed/domains.
 			 */
-			$validation_result['is_valid'] = apply_filters( 'gf_blacklist_is_valid', false, $field, $email, $domain, $tld, $blacklist );
+			$validation_result['is_valid'] = apply_filters( 'gf_blacklist_is_valid', false, $field, $email, $blacklist );
 			$field['failed_validation']    = true;
 
 			// Set the validation message or use the default.
@@ -310,11 +319,9 @@ class GFEmailBlacklist extends GFAddOn {
 			 * @param bool   $validation_message The custom validation method.
 			 * @param array  $field              The Field Object.
 			 * @param string $email              The email entered in the input.
-			 * @param string $domain             The full domain entered in the input.
-			 * @param string $tld                The top level domain entered in the input.
 			 * @param array  $blacklist          List of the blocked emailed/domains.
 			 */
-			$field['validation_message'] = apply_filters( 'gf_blacklist_validation_message', $validation_message, $field, $email, $domain, $tld, $blacklist );
+			$field['validation_message'] = apply_filters( 'gf_blacklist_validation_message', $validation_message, $field, $email, $blacklist );
 		}
 
 		$validation_result['form'] = $form;
@@ -329,6 +336,45 @@ class GFEmailBlacklist extends GFAddOn {
 	 */
 	protected function gf_emailblacklist_clean( $string ) {
 		return strtolower( trim( $string ) );
+	}
+
+	/**
+	 * Convert each blacklist email entry into a regular expression search pattern.
+	 *
+	 * @param string $email An email to convert.
+	 * @return string A regex pattern.
+	 */
+	protected function gf_emailblacklist_pattern( $email ) {
+		
+		if( str_contains( $email, '@' ) ) {
+			$array  = explode( '@', $email );
+			$user   = $array[0];
+			$domain = $array[1];
+		} else {
+			$user   = '*';
+			$domain = $email;
+		}
+
+		// Avoid special characters in the email.
+		if ( preg_match( '/[^a-zA-ZÀ-ÖØ-öø-ÿ0-9_\+\-\.\*]/', $user ) ) return false;
+		if ( preg_match( '/[^a-zA-ZÀ-ÖØ-öø-ÿ0-9_\-\.\*]/', $domain ) ) return false;
+
+		// Remove periods from username.
+		$user = str_replace( '.', '', $user );
+
+		// Create the regex pattern.
+		$pattern = '/^' . $user . '@' . $domain . '$/';
+
+		$pattern = str_replace( '+', '\+', $pattern );
+		$pattern = str_replace( '-', '\-', $pattern );
+		$pattern = str_replace( '.', '\.', $pattern );
+		$pattern = str_replace( '*', '.*?', $pattern );
+		
+		//echo $pattern;
+		//echo "<hr>";
+
+		//die;
+		return $pattern;
 	}
 
 	/**
