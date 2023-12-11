@@ -245,6 +245,7 @@ class GFEmailBlacklist extends GFAddOn {
 			$email  = $this->gf_emailblacklist_clean( rgpost( "input_{$field['id']}" ) );
 			$user   = $this->gf_emailblacklist_clean( rgar( explode( '@', $email ), 0 ) );
 			$domain = $this->gf_emailblacklist_clean( rgar( explode( '@', $email ), 1 ) );
+			$tld    = strrchr( $domain, '.' );
 
 			/**
 			 * Filter to allow third party plugins short circuit blacklist validation.
@@ -255,7 +256,7 @@ class GFEmailBlacklist extends GFAddOn {
 			 * @param string $email     The email entered in the input.
 			 * @param array  $blacklist List of the blocked emailed/domains.
 			 */
-			if ( apply_filters( 'gf_blacklist_validation_short_circuit', false, $field, $email, $blacklist ) ) {
+			if ( apply_filters( 'gf_blacklist_validation_short_circuit', false, $field, $email, $domain, $tld, $blacklist ) ) {
 				continue;
 			}
 
@@ -299,7 +300,7 @@ class GFEmailBlacklist extends GFAddOn {
 			 * @param string $email     The email entered in the input.
 			 * @param array  $blacklist List of the blocked emailed/domains.
 			 */
-			$validation_result['is_valid'] = apply_filters( 'gf_blacklist_is_valid', false, $field, $email, $blacklist );
+			$validation_result['is_valid'] = apply_filters( 'gf_blacklist_is_valid', false, $field, $email, $domain, $tld, $blacklist );
 			$field['failed_validation']    = true;
 
 			// Set the validation message or use the default.
@@ -321,7 +322,7 @@ class GFEmailBlacklist extends GFAddOn {
 			 * @param string $email              The email entered in the input.
 			 * @param array  $blacklist          List of the blocked emailed/domains.
 			 */
-			$field['validation_message'] = apply_filters( 'gf_blacklist_validation_message', $validation_message, $field, $email, $blacklist );
+			$field['validation_message'] = apply_filters( 'gf_blacklist_validation_message', $validation_message, $field, $email, $domain, $tld, $blacklist );
 		}
 
 		$validation_result['form'] = $form;
