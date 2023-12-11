@@ -363,17 +363,13 @@ class GFEmailBlacklist extends GFAddOn {
 		$user = str_replace( '.', '', $user );
 
 		// Create the regex pattern.
-		$pattern = '/^' . $user . '@' . $domain . '$/';
+		$pattern = '/^' . $user . '(?:+*)?@' . $domain . '$/';
 
 		$pattern = str_replace( '+', '\+', $pattern );
 		$pattern = str_replace( '-', '\-', $pattern );
 		$pattern = str_replace( '.', '\.', $pattern );
 		$pattern = str_replace( '*', '.*?', $pattern );
 		
-		//echo $pattern;
-		//echo "<hr>";
-
-		//die;
 		return $pattern;
 	}
 
