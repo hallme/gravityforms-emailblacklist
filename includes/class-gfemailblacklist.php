@@ -108,7 +108,7 @@ class GFEmailBlacklist extends GFAddOn {
 						'label'   => __( 'Global Blacklisted Emails', 'gravity-forms-email-blacklist' ),
 						'type'    => 'text',
 						'name'    => 'default_emailblacklist',
-						'tooltip' => __( 'Please enter a comma separated list of blacklisted domains (ex. hotmail.com), email addresses (ex. user@aol.com), and/or include the wildcard notation to block top-level domains (ex. *.com). This setting can be overridden on individual email fields in the advanced settings.', 'gravity-forms-email-blacklist' ),
+						'tooltip' => __( 'Please enter a comma separated list of blacklisted domains (ex. hotmail.com) and/or email addresses (ex. user@aol.com). You may include wildcard notation for either (*.com, jdoe@*, fake*@fakemail.*). This setting can be overridden on individual email fields in the advanced settings.', 'gravity-forms-email-blacklist' ),
 						'class'   => 'medium',
 					),
 					array(
@@ -170,7 +170,7 @@ class GFEmailBlacklist extends GFAddOn {
 	 * @return array modified tooltips
 	 */
 	public function gf_emailblacklist_field_tooltips( $tooltips ) {
-		$tooltips['form_field_email_blacklist']            = __( "Please enter a comma separated list of blacklisted domains, (ex. hotmail.com), email addresses (ex. user@aol.com), and/or include the wildcard notation to block top-level domains (ex. *.com). This will override the globally defined blacklisted emails setting. Enter 'none' to bypass the global setting and allow all email addresses.", 'gravity-forms-email-blacklist' );
+		$tooltips['form_field_email_blacklist']            = __( "Please enter a comma separated list of blacklisted domains, (ex. hotmail.com) and/or email addresses (ex. user@aol.com). You may include wildcard notation for either (*.com, jdoe@*, fake*@fakemail.*). This will override the globally defined blacklisted emails setting. Enter 'none' to bypass the global setting and allow all email addresses.", 'gravity-forms-email-blacklist' );
 		$tooltips['form_field_email_blacklist_validation'] = __( 'Please enter an error message if a blacklisted email is submitted. This will override the globally defined error message.', 'gravity-forms-email-blacklist' );
 		return $tooltips;
 	}
