@@ -118,6 +118,24 @@ class GFEmailBlacklist extends GFAddOn {
 						'tooltip' => __( 'Please enter a default error message if a blacklisted email is submitted. This setting can be overridden on individual email fields in the advanced settings.', 'gravity-forms-email-blacklist' ),
 						'class'   => 'medium',
 					),
+					array(
+						'label'         => __( 'Global Invalid Entry Procedure', 'gravity-forms-email-blacklist' ),
+						'type'          => 'radio',
+						'name'          => 'default_emailblacklist_handling',
+						'default_value' => 'error',
+						'choices'       => array(
+							array(
+								'label' => 'Validation Error',
+								'value' => 'error',
+							),
+							array(
+								'label' => 'Mark as Spam',
+								'value' => 'spam',
+							),
+						),
+						'tooltip'       => __( 'Please determine whether blacklisted emails get a validation error or are accepted and marked as spam.', 'gravity-forms-email-blacklist' ),
+						'class'         => 'large',
+					),
 				),
 			),
 		);
@@ -159,6 +177,24 @@ class GFEmailBlacklist extends GFAddOn {
 			</label>
 			<input type="text" id="field_email_blacklist_validation" class="fieldwidth-3" size="35" onkeyup="SetFieldProperty('email_blacklist_validation', this.value);" placeholder="<?php echo esc_attr( $emailblacklist_msg ); ?>">
 		</li>
+
+		<li class="email_blacklist_handling field_setting">
+			<fieldset id="fieldset_email_blacklist_handling">
+				<label for="fieldset_email_blacklist_handling">
+					<?php esc_html_e( 'Blacklisted Emails Invalid Entry Procedure', 'gravity-forms-email-blacklist' ); ?>
+					<?php gform_tooltip( 'form_field_email_blacklist_handling' ); ?>
+				</label>
+				<div style="display:grid;gap:2px;">
+					<input type="radio" name="field_email_blacklist_handling" id="field_email_blacklist_handling_global" value="global" onclick="SetFieldProperty('email_blacklist_handling', this.value);" onkeypress="SetFieldProperty('email_blacklist_handling', this.value);">
+					<label for="field_email_blacklist_handling_global" class="inline">Use Global Setting</label>
+					<input type="radio" name="field_email_blacklist_handling" id="field_email_blacklist_handling_error" value="error" onclick="SetFieldProperty('email_blacklist_handling', this.value);" onkeypress="SetFieldProperty('email_blacklist_handling', this.value);">
+					<label for="field_email_blacklist_handling_error" class="inline">Validation Error</label>
+					<input type="radio" name="field_email_blacklist_handling" id="field_email_blacklist_handling_spam" value="spam" onclick="SetFieldProperty('email_blacklist_handling', this.value);" onkeypress="SetFieldProperty('email_blacklist_handling', this.value);">
+					<label for="field_email_blacklist_handling_spam" class="inline">Mark as Spam</label>
+				</div>
+				<br class="clear">
+			</fieldset>
+		</li>
 			<?php
 		}
 	}
@@ -172,6 +208,7 @@ class GFEmailBlacklist extends GFAddOn {
 	public function gf_emailblacklist_field_tooltips( $tooltips ) {
 		$tooltips['form_field_email_blacklist']            = __( "Please enter a comma separated list of blacklisted domains, (ex. hotmail.com) and/or email addresses (ex. user@aol.com). You may include wildcard notation for either (*.com, jdoe@*, fake*@fakemail.*). This will override the globally defined blacklisted emails setting. Enter 'none' to bypass the global setting and allow all email addresses.", 'gravity-forms-email-blacklist' );
 		$tooltips['form_field_email_blacklist_validation'] = __( 'Please enter an error message if a blacklisted email is submitted. This will override the globally defined error message.', 'gravity-forms-email-blacklist' );
+		$tooltips['form_field_email_blacklist_handling']   = __( 'Please determine whether blacklisted emails get a validation error or are accepted and marked as spam.', 'gravity-forms-email-blacklist' );
 		return $tooltips;
 	}
 
@@ -183,12 +220,21 @@ class GFEmailBlacklist extends GFAddOn {
 	<script type='text/javascript'>
 		jQuery(document).ready(function($) {
 			// Alter the setting offered for the email input type.
-			fieldSettings["email"] = fieldSettings["email"] + ", .email_blacklist_setting, .email_blacklist_validation"; // this will show all fields that Paragraph Text field shows plus my custom setting
+			fieldSettings["email"] = fieldSettings["email"] + ", .email_blacklist_setting, .email_blacklist_validation, .email_blacklist_handling"; // this will show all fields that Paragraph Text field shows plus my custom setting
 
 			// Binding to the load field settings event to initialize the checkbox.
 			$(document).bind("gform_load_field_settings", function(event, field, form){
 				$("#field_email_blacklist").val(field["email_blacklist"]);
 				$("#field_email_blacklist_validation").val(field["email_blacklist_validation"]);
+
+				if( "error" == field["email_blacklist_handling"] ) {
+					$("#field_email_blacklist_handling_error").prop("checked", true).trigger("click");
+				} else if ( "spam" == field["email_blacklist_handling"] ) {
+					$("#field_email_blacklist_handling_spam").prop("checked", true).trigger("click");
+				} else {
+					$("#field_email_blacklist_handling_global").prop("checked", true).trigger("click");
+				}
+
 			});
 		});
 	</script>
