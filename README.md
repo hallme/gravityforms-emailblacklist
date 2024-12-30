@@ -1,111 +1,111 @@
-Gravity Forms Email Blacklist
-================
+# Gravity Forms Email Blacklist
+
 ## Description
 
-The Email Blacklist Add-on for Gravity Forms was built to help block submissions from users with generic or competitors email addresses. Prevent the user from processing the form and stop non-qualified leads from being collected.
+The Email Blacklist Add-on for Gravity Forms was built to help block submissions from users with generic or competitor email addresses. Prevent the user from processing the form and stop non-qualified leads from being collected.
 
-This plugin allows site admins to create a list of domains that if used in an email field on a Gravity Form it will cause a validation error and block the submission. A default email blacklist and validation message can be created to use across all email fields. These default settings can be overridden on a per email field basis.
+This plugin allows site admins to create a list of domains that, if used in an email field on a Gravity Form, will cause a validation error and block the submission. A default email blacklist and validation message can be created to use across all email fields. These default settings can be overridden on a per-email field basis.
 
-Global settings can be added on 'Forms' > 'Settings' > 'Email Blacklist'. To add settings to an individual email field, select the field and navigate to the 'Advanced Settings' tab.
+Global settings can be added under **Forms > Settings > Email Blacklist**. To add settings to an individual email field, select the field and navigate to the **Advanced Settings** tab.
 
-This plugin works by blocking either individual email addresses (ex. jsmith@gmail.com), email address domains (ex. gmail.com), and/or email address top-level domains (ex. *.com).
+This plugin works by blocking either individual email addresses (e.g., `jsmith@gmail.com`), email address domains (e.g., `gmail.com`), and/or email address top-level domains (e.g., `*.com`).
 
-### Installation
+## Installation
 
-1. Search for and install the 'Gravity Forms Email Blacklist' OR Upload `gravity-forms-email-blacklist` to the `/wp-content/plugins/` directory.
-2. Activate the plugin through the 'Plugins' menu in WordPress.
-3. Navigate from the Dashboard to the 'Forms' > 'Settings' > 'Email Blacklist' to make sure it is installed.
+1. Search for and install the 'Gravity Forms Email Blacklist' plugin, OR upload `gravity-forms-email-blacklist` to the `/wp-content/plugins/` directory.
+2. Activate the plugin through the **Plugins** menu in WordPress.
+3. Navigate to **Forms > Settings > Email Blacklist** to configure the plugin.
 
-### Screenshots
+## Screenshots
 
 1. Global Plugin Settings
 2. Email Field Settings
 3. Email Field Settings Updated
 4. Form Validation Error
 
-### Instructions
+## Instructions
 
-## Global Blacklist Settings
-Once set up, these settings will be used on all email input fields across all the Gravity Forms used on the site. They can be overridden by the individual email blacklist settings below.
+### Global Blacklist Settings
 
-1. Once Logged into your site navigate to 'Forms' > 'Settings' > 'Email Blacklist'
-2. In the 'Global Blacklisted Emails' input enter a comma separated list of blacklisted domains (ex. hotmail.com), email addresses (ex. user@aol.com), and/or include the wildcard notation to block top-level domains (ex. *.com). This setting can be overridden on individual email fields in the advanced settings.
-3. In the 'Global Validation Message' input enter a default error message if a blacklisted email is submitted. This setting can be overridden on individual email fields in the advanced settings.
-4. Click the 'Update Settings' button to save the settings.
+Once set up, these settings will apply to all email input fields across all Gravity Forms used on the site. They can be overridden by individual email blacklist settings.
 
-## Individual Email Input Blacklist Settings
-Once set up these settings will be used on this form only and in place of the global blacklist settings above.
+1. Log in to your site and navigate to **Forms > Settings > Email Blacklist**.
+2. In the **Global Blacklisted Emails** field, enter a comma-separated list of blacklisted domains (e.g., `hotmail.com`), email addresses (e.g., `user@aol.com`), and/or use wildcard notation to block top-level domains (e.g., `*.com`). These settings can be overridden in individual email fields under advanced settings.
+3. In the **Global Validation Message** field, enter a default error message that will display if a blacklisted email is submitted. This setting can also be overridden in individual email fields.
+4. Click **Update Settings** to save your changes.
 
-1. Once Logged into your site navigate to the Gravity Form you would like to update.
-2. Add or update an existing email input field on the form.
-3. Go to the 'Advanced Settings' tab for the 'Blacklisted Emails' input.
-4. In the 'Blacklisted Emails' input enter a comma separated list of blacklisted domains (ex. hotmail.com), email addresses (ex. user@aol.com), and/or include the wildcard notation to block top-level domains (ex. *.com). This will override the globally defined blacklisted emails setting. Enter 'none' to bypass the global setting and allow all email addresses.
-5. In the 'Blacklisted Emails Validation Message' input enter an error message if a blacklisted email is submitted. This will override the globally defined error message.
-6. Click the 'Save Form' button to save the settings.
+### Individual Email Input Blacklist Settings
 
-### Additional Resources
-* [Gravity Forms Documentation - Getting Started](https://docs.gravityforms.com/category/getting-started/)
-* [Gravity Forms Documentation - Email Input Fields](https://docs.gravityforms.com/email/)
-* [Gravity Forms Documentation - Fighting Spam](https://docs.gravityforms.com/spam/)
+These settings apply only to the selected form and override the global blacklist settings.
 
-### Changelog
+1. Log in to your site and navigate to the Gravity Form you want to update.
+2. Add or edit an existing email input field on the form.
+3. Go to the **Advanced Settings** tab for the field.
+4. In the **Blacklisted Emails** field, enter a comma-separated list of blacklisted domains (e.g., `hotmail.com`), email addresses (e.g., `user@aol.com`), and/or use wildcard notation to block top-level domains (e.g., `*.com`). To bypass the global settings and allow all email addresses, enter `none`.
+5. In the **Blacklisted Emails Validation Message** field, enter an error message to display if a blacklisted email is submitted. This setting overrides the global validation message.
+6. Click **Save Form** to apply your changes.
 
-#### 2.5.5
-* Fixed version number issue
+## Additional Resources
 
-#### 2.5.4 
-* Fixed validation function to remove any empty values for the array of blacklisted emails to prevent false positives from empty email fields.
-* Added capability declination to the class to allow the plugin to work with role and capabilities plugins. 
+- [Gravity Forms Documentation - Getting Started](https://docs.gravityforms.com/category/getting-started/)
+- [Gravity Forms Documentation - Email Input Fields](https://docs.gravityforms.com/email/)
+- [Gravity Forms Documentation - Fighting Spam](https://docs.gravityforms.com/spam/)
 
-#### 2.5.3
-* Updated labels and descriptions throughout the admin settings to improve clarity.
+## Changelog
 
-#### 2.5.2
-* Fix: Updated method for getting the TLD to make sure the domain wildcards work in the case of a sub-domain email.
+### 2.7.0
+- **Enhancement:** Added support to treat submissions with blacklisted emails as spam.
 
-#### 2.5.1
-* Updated static setting strings to allow them to be translated.
-* Added Text Domain.
-* Added a function to Load Loads a plugin’s translated strings.
-* Added filter to allow 3rd party plugins to alter the validation message before it is output.
-* Added filter to allow 3rd party plugins to alter the is_valid check.
-* Added short circuit filter to allow 3rd party plugins to jump over a check.
+### 2.5.5
+- **Bugfix:** Corrected version number issue.
 
-#### 2.5
-* Updated documentation, readme and added instructions.
-* Updated version number and plugin information on compatibility and stable release.
-* Fix: Updated validation function to account for email fields hidden by conditional logic
+### 2.5.4
+- **Bugfix:** Resolved empty value handling in the validation function to prevent false positives.
+- **Enhancement:** Added capability declination support for better integration with role and capabilities plugins.
 
-#### 2.4
-* Updated the plugin to allow the use of wildcards to block whole top-level domains.
+### 2.5.3
+- **Improvement:** Updated labels and descriptions in admin settings for better clarity.
 
-#### 2.3
-* Updated the way the AddOn is initiated.
-* Updated code to meet PHPCS code standards for WordPress.
-* Updated version and compatibility numbers.
-* Updated readme.txt.
+### 2.5.2
+- **Bugfix:** Improved TLD detection to ensure wildcard support for sub-domain emails.
 
-#### 2.2
-* Added Author URL to GitHub Repo
-* Fixed typo in readme.txt
+### 2.5.1
+- **Enhancement:** Enabled translation for static setting strings.
+- **Added:** Text domain for translations.
+- **Added:** Filters for third-party plugins to modify validation messages and checks.
+- **Added:** Short-circuit filter for bypassing specific checks.
 
-#### 2.1
-* Added plugin icon
+### 2.5.0
+- **Documentation:** Updated instructions and compatibility details.
+- **Bugfix:** Adjusted validation for hidden email fields under conditional logic.
 
-#### 2.0
-* Bug Fix: Removed 'var_dump' in validation function.
-* Added 'gf_emailblacklist_clean' function to make comparison case insensitive. Thanks to @ractoon, @rscoates.
-* Updated function to work with both email domains and specific emails.
-* Ran 'class-gfemailblacklist.php' through PHPCS with WordPress Coding Standards.
-* Moved class to '/includes/class-gfemailblacklist.php' file.
-* Added placeholder text to fields
-* Updated code comments.
-* Updated plugin file name.
-* Updated readme.txt and README.md
+### 2.4.0
+- **Feature:** Added support for wildcards to block entire top-level domains.
 
-#### 1.1
-* Added custom validation message options to the email field under the 'Advanced' field settings
-* Added default setting for the email blacklist and validation message to the form settings area to be used on all forms with an email field.
+### 2.3.0
+- **Improvement:** Refactored AddOn initialization process.
+- **Code Standard:** Updated to meet PHPCS WordPress coding standards.
+- **Updated:** Version and compatibility numbers.
 
-#### 1.0
-* Added email blacklist options to the email field under the 'Advanced' field settings
+### 2.2.0
+- **Added:** GitHub repository URL in author details.
+- **Bugfix:** Corrected typo in the readme file.
+
+### 2.1.0
+- **Feature:** Added plugin icon for better identification.
+
+### 2.0.0
+- **Bugfix:** Removed debug statements from the validation function.
+- **Enhancement:** Added case-insensitive email comparison.
+- **Improvement:** Enhanced functionality for both domains and specific emails.
+- **Code Quality:** Passed through PHPCS with WordPress standards.
+- **Structure:** Moved main class to `/includes` directory.
+- **UX:** Added placeholder text to input fields.
+- **Updated:** Code comments and file naming for clarity.
+
+### 1.1.0
+- **Feature:** Introduced custom validation messages in email field advanced settings.
+- **Enhancement:** Added default global settings for blacklist and validation messages.
+
+### 1.0.0
+- **Initial Release:** Added email blacklist options to email fields under advanced settings.

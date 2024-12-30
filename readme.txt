@@ -4,7 +4,7 @@ Donate link: N/A
 Tags: gravity forms, gravity form, forms, gravity, form, email blacklist, block email, blacklist
 Requires at least: 3.8
 Tested up to: 6.1.1
-Stable tag: 2.5.5
+Stable tag: 2.7.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -62,62 +62,60 @@ Once set up these settings will be used on this form only and in place of the gl
 
 === Changelog ===
 
+= 2.7.0 =
+* Enhancement: Added support to treat submissions with blacklisted emails as spam.
+
 = 2.5.5 =
-* Fixed version number issue
+* Bugfix: Corrected version number issue.
 
 = 2.5.4 =
-* Fixed validation function to remove any empty values for the array of blacklisted emails to prevent false positives from empty email fields.
-* Added capability declination to the class to allow the plugin to work with role and capabilities plugins. 
+* Bugfix: Resolved empty value handling in the validation function to prevent false positives.
+* Enhancement: Added capability declination support for better integration with role and capabilities plugins.
 
 = 2.5.3 =
-* Updated labels and descriptions throughout the admin settings to improve clarity.
+* Improvement: Updated labels and descriptions in admin settings for better clarity.
 
 = 2.5.2 =
-* Fix: Updated method for getting the TLD to make sure the domain wildcards work in the case of a sub-domain email.
+* Bugfix: Improved TLD detection to ensure wildcard support for sub-domain emails.
 
 = 2.5.1 =
-* Updated static setting strings to allow them to be translated.
-* Added Text Domain.
-* Added a function to Load Loads a plugin’s translated strings.
-* Added filter to allow 3rd party plugins to alter the validation message before it is output.
-* Added filter to allow 3rd party plugins to alter the is_valid check.
-* Added short circuit filter to allow 3rd party plugins to jump over a check.
+* Enhancement: Enabled translation for static setting strings.
+* Added: Text domain for translations.
+* Added: Filters for 3rd party plugins to modify validation messages and checks.
+* Added: Short-circuit filter for bypassing specific checks.
 
-= 2.5 =
-* Updated documentation, readme and added instructions.
-* Updated version number and plugin information on compatibility and stable release.
-* Fix: Updated validation function to account for email fields hidden by conditional logic
+= 2.5.0 =
+* Documentation: Updated instructions and compatibility details.
+* Bugfix: Adjusted validation for hidden email fields under conditional logic.
 
-= 2.4 =
-* Updated the plugin to allow the use of wildcards to block whole top-level domains.
+= 2.4.0 =
+* Feature: Added support for wildcards to block entire top-level domains.
 
-= 2.3 =
-* Updated the way the AddOn is initiated.
-* Updated code to meet PHPCS code standards for WordPress.
-* Updated version and compatibility numbers.
-* Updated readme.txt.
+= 2.3.0 =
+* Improvement: Refactored AddOn initialization process.
+* Code Standard: Updated to meet PHPCS WordPress coding standards.
+* Updated: Version and compatibility numbers.
 
-= 2.2 =
-* Added Author URL to GitHub Repo
-* Fixed typo in readme.txt
+= 2.2.0 =
+* Added: GitHub repository URL in author details.
+* Bugfix: Corrected typo in the readme file.
 
-= 2.1 =
-* Added plugin icon
+= 2.1.0 =
+* Feature: Added plugin icon for better identification.
 
-= 2.0 =
-* Bug Fix: Removed 'var_dump' in validation function.
-* Added 'gf_emailblacklist_clean' function to make comparison case insensitive. Thanks to @ractoon, @rscoates.
-* Updated function to work with both email domains and specific emails.
-* Ran 'class-gfemailblacklist.php' through [PHPCS](https://github.com/squizlabs/PHP_CodeSniffer/wiki) with [WordPress Coding Standards](https://github.com/WordPress-Coding-Standards/WordPress-Coding-Standards/wiki).
-* Moved class to '/includes/class-gfemailblacklist.php' file.
-* Added placeholder text to fields
-* Updated code comments.
-* Updated plugin file name.
-* Updated readme.txt and README.md
+= 2.0.0 =
+* Bugfix: Removed debug statements from validation function.
+* Enhancement: Added case-insensitive email comparison.
+* Improvement: Enhanced functionality for both domains and specific emails.
+* Code Quality: Passed through PHPCS with WordPress standards.
+* Structure: Moved main class to '/includes' directory.
+* UX: Added placeholder text to input fields.
+* Updated: Code comments and file naming for clarity.
 
-= 1.1 =
-* Added custom validation message options to the email field under the 'Advanced' field settings
-* Added default setting for the email blacklist and validation message to the form settings area to be used on all forms with an email field.
+= 1.1.0 =
+* Feature: Introduced custom validation messages in email field advanced settings.
+* Enhancement: Added default global settings for blacklist and validation messages.
 
-= 1.0 =
-* Added email blacklist options to the email field under the 'Advanced' field settings
+= 1.0.0 =
+* Initial Release: Added email blacklist options to email fields under advanced settings.
+
