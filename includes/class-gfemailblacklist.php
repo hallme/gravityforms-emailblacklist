@@ -92,6 +92,9 @@ class GFEmailBlacklist extends GFAddOn {
 		parent::init_frontend();
 		add_filter( 'gform_validation', array( $this, 'email_blacklist_validation' ), 10, 2 );
 		add_filter( 'gf_blacklist_is_valid', array( $this, 'is_email_blacklisted' ), 10, 6 );
+		add_filter( 'gform_entry_is_spam', array( $this, 'mark_as_spam' ), 10, 3 );
+		add_filter( 'gf_blacklist_is_spam', array( $this, 'is_email_blacklisted' ), 10, 6 );
+
 	}
 
 	/**
@@ -316,6 +319,58 @@ class GFEmailBlacklist extends GFAddOn {
 		// Update the form object in the validation result and return.
 		$validation_result['form'] = $form;
 		return $validation_result;
+	}
+
+	/**
+	 * Add email blacklist to gforms spam function.
+	 *
+	 * @resources: https://docs.gravityforms.com/gform_entry_is_spam/
+	 *
+	 * @param  bool                                               $is_spam  Indicates if the entry is to be marked as spam.
+	 * @param        $form     The form object currently being processed.
+	 * @param        $entry    The entry object being evaluated.
+	 *
+	 * @return bool Is the entry spam?
+	 */
+	public function mark_as_spam( $is_spam, $form, $entry ) {
+		// If the entry is already spam, skip.
+		if ( $is_spam ) {
+			return $is_spam;
+		}
+
+		// Get the global settings.
+		$global_settings            = $this->get_global_settings();
+		$default_blacklist          = $global_settings['default_emailblacklist'];
+		$default_handling           = $global_settings['default_emailblacklist_handling'];
+
+		foreach ( $form['fields'] as &$field ) {
+
+			// Skip if not an email field or if field is hidden by GF conditional logic.
+			if ( 'email' !== RGFormsModel::get_input_type( $field ) || RGFormsModel::is_field_hidden( $form, $field, array() ) ) {
+				continue;
+			}
+
+			// If we are not going to treat it as spam, skip.
+			$blacklist_handling = ! empty( $field['email_blacklist_handling'] ) && 'global' !== $field['email_blacklist_handling'] ? $field['email_blacklist_handling'] : $default_handling;
+			if ( 'spam' !== $blacklist_handling ) {
+				continue;
+			}
+
+			// Determine the blacklist for the field.
+			$blacklist = ! empty( $field['email_blacklist'] ) ? $field['email_blacklist'] : $default_blacklist;
+			// Extract the email input and parse email components.
+			$email  = $this->gf_emailblacklist_clean( rgar( $entry, $field->id ) );
+			$domain = $this->gf_emailblacklist_clean( rgar( explode( '@', $email ), 1 ) );
+			$tld    = strrchr( $domain, '.' );
+			
+			$is_spam = ! apply_filters( 'gf_blacklist_is_spam', false, $field, $email, $domain, $tld, $blacklist );
+
+			if ( $is_spam && method_exists( 'GFCommon', 'set_spam_filter' ) ) {
+				GFCommon::set_spam_filter( rgar( $form, 'id' ), 'Gravity Forms Email Blacklist', 'The email address ' . $email . ' is blacklisted.' );
+			}
+		}
+
+		return $is_spam;
 	}
 
 	/**
