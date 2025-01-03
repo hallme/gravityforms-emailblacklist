@@ -90,7 +90,8 @@ class GFEmailBlacklist extends GFAddOn {
 	 */
 	public function init_frontend() {
 		parent::init_frontend();
-		add_filter( 'gform_validation', array( $this, 'gf_emailblacklist_validation' ) );
+		add_filter( 'gform_validation', array( $this, 'email_blacklist_validation' ), 10, 2 );
+		add_filter( 'gf_blacklist_is_valid', array( $this, 'is_email_blacklisted' ), 10, 6 );
 	}
 
 	/**
@@ -139,6 +140,23 @@ class GFEmailBlacklist extends GFAddOn {
 				),
 			),
 		);
+	}
+
+	/**
+	 * Collect global settings.
+	 *
+	 * @return array
+	 */
+	public function get_global_settings() {
+		$global_settings = get_option(
+			'gravityformsaddon_' . $this->_slug . '_settings',
+			array(
+				'default_emailblacklist'           => '',
+				'default_emailblacklist_error_msg' => '',
+				'default_emailblacklist_handling'  => 'error',
+			)
+		);
+		return $global_settings;
 	}
 
 	/**
@@ -242,137 +260,115 @@ class GFEmailBlacklist extends GFAddOn {
 	}
 
 	/**
-	 * Add email blacklist to gforms validation function.
+	 * Add email blacklist to Gravity Forms validation function.
 	 *
-	 * @resources: https://docs.gravityforms.com/using-gform-validation-hook/
+	 * @link https://docs.gravityforms.com/using-gform-validation-hook/
 	 *
-	 * @param  array $validation_result Contains the validation result and the current.
+	 * @param array  $validation_result The validation result array.
+	 * @param string $context           The context for the current submission.
 	 *
-	 * @return array The field validation results.
+	 * @return array The modified validation result.
 	 */
-	public function gf_emailblacklist_validation( $validation_result ) {
+	public function email_blacklist_validation( $validation_result, $context ) {
+		// Get the global settings.
+		$global_settings            = $this->get_global_settings();
+		$default_blacklist          = $global_settings['default_emailblacklist'];
+		$default_validation_message = $global_settings['default_emailblacklist_error_msg'];
+		$default_handling           = $global_settings['default_emailblacklist_handling'];
 
-		// Collect global settings.
-		$default_blacklist = get_option( 'gravityformsaddon_' . $this->_slug . '_settings' );
-		if ( is_array( $default_blacklist ) && ! empty( $default_blacklist['default_emailblacklist'] ) ) {
-			$default_blacklist = $default_blacklist['default_emailblacklist'];
-		} else {
-			$default_blacklist = '';
-		}
-
-		// Collect form results.
+		// Get the form object.
 		$form = $validation_result['form'];
 
-		// Loop through results.
 		foreach ( $form['fields'] as &$field ) {
 
-			// If this is not an email field, skip.
-			if ( 'email' !== RGFormsModel::get_input_type( $field ) ) {
+			// Skip if not an email field or if field is hidden by GF conditional logic.
+			if ( 'email' !== RGFormsModel::get_input_type( $field ) || RGFormsModel::is_field_hidden( $form, $field, array() ) ) {
 				continue;
 			}
 
-			// If the field is hidden by GF conditional logic, skip.
-			if ( RGFormsModel::is_field_hidden( $form, $field, array() ) ) {
+			// Determine the blacklist handling for the field. If we are going to treat it as spam, skip.
+			$blacklist_handling = ! empty( $field['email_blacklist_handling'] ) && 'global' !== $field['email_blacklist_handling'] ? $field['email_blacklist_handling'] : $default_handling;
+			if ( 'spam' === $blacklist_handling ) {
 				continue;
 			}
 
-			// Collect blacklisted domains from backend and clean up.
-			$blacklist = $default_blacklist;
-			if ( ! empty( $field['email_blacklist'] ) ) { // collect per form settings.
-				$blacklist = $field['email_blacklist'];
-			}
-
-			// If the user entered "none", skip.
-			if ( 'none' === $this->gf_emailblacklist_clean( $blacklist ) ) {
-				continue;
-			}
-
-			// Get the domain from user entered email.
+			// Determine the blacklist for the field.
+			$blacklist = ! empty( $field['email_blacklist'] ) ? $field['email_blacklist'] : $default_blacklist;
+			// Extract the email input and parse email components.
 			$email  = $this->gf_emailblacklist_clean( rgpost( "input_{$field['id']}" ) );
-			$user   = $this->gf_emailblacklist_clean( rgar( explode( '@', $email ), 0 ) );
 			$domain = $this->gf_emailblacklist_clean( rgar( explode( '@', $email ), 1 ) );
 			$tld    = strrchr( $domain, '.' );
 
-			/**
-			 * Filter to allow third party plugins short circuit blacklist validation.
-			 *
-			 * @since 2.5.1
-			 * @param bool   false      Default value.
-			 * @param array  $field     The Field Object.
-			 * @param string $email     The email entered in the input.
-			 * @param array  $blacklist List of the blocked emailed/domains.
-			 */
-			if ( apply_filters( 'gf_blacklist_validation_short_circuit', false, $field, $email, $domain, $tld, $blacklist ) ) {
-				continue;
+			// Apply the blacklist validation filter.
+			$is_valid = apply_filters( 'gf_blacklist_is_valid', false, $field, $email, $domain, $tld, $blacklist );
+
+			// If the email is not valid, set the field as failed and add the validation error message.
+			if ( ! $is_valid ) {
+				$field['failed_validation'] = true;
+				// Retrieve or set a default validation message.
+				$validation_message = ! empty( $field['email_blacklist_validation'] ) ? $field['email_blacklist_validation'] : $default_validation_message;
+				// Apply a filter to customize the validation message.
+				$field['validation_message']   = apply_filters( 'gf_blacklist_validation_message', $validation_message, $field, $email, $domain, $tld, $blacklist );
+				$validation_result['is_valid'] = false;
 			}
-
-			// Create array of blacklisted emails/domains.
-			if ( ! is_array( $blacklist ) ) {
-				$blacklist = explode( ',', $blacklist );
-			}
-			$blacklist = array_map( array( $this, 'gf_emailblacklist_clean' ), $blacklist );
-			$blacklist = array_filter( $blacklist );
-
-			// No blacklisted email, skip.
-			if ( empty( $blacklist ) ) {
-				continue;
-			}
-
-			// Search the array for matching blacklist parameters.
-			$blacklist_patterns = array_map( array($this, 'gf_emailblacklist_pattern' ), $blacklist );
-
-			// Remove periods from the username part of the email since they all point to the same email address
-			$user  = str_replace( '.', '', $user );
-			$email = $user . "@" . $domain;
-
-			// Check the email against each blacklist pattern.
-			foreach( $blacklist_patterns as &$pattern ) {
-				if ( preg_match( $pattern, $email, $blacklist_matches ) ) {
-					break;
-				}
-			}
-
-			// If the email has no blacklist matches, skip.
-			if( empty( $blacklist_matches ) ) {
-				continue;
-			}
-
-			/**
-			 * Filter to allow third party plugins to set the email blacklist validation.
-			 *
-			 * @since 2.5.1
-			 * @param bool   false      Default value.
-			 * @param array  $field     The Field Object.
-			 * @param string $email     The email entered in the input.
-			 * @param array  $blacklist List of the blocked emailed/domains.
-			 */
-			$validation_result['is_valid'] = apply_filters( 'gf_blacklist_is_valid', false, $field, $email, $domain, $tld, $blacklist );
-			$field['failed_validation']    = true;
-
-			// Set the validation message or use the default.
-			if ( ! empty( $field['email_blacklist_validation'] ) ) {
-				$validation_message = $field['email_blacklist_validation'];
-			} elseif ( get_option( 'gravityformsaddon_' . $this->_slug . '_settings' ) ) {
-				$validation_message = get_option( 'gravityformsaddon_' . $this->_slug . '_settings' );
-				$validation_message = $validation_message['default_emailblacklist_error_msg'];
-			} else {
-				$validation_message = __( 'Sorry, the email address entered is not eligible for this form.', 'gravity-forms-email-blacklist' );
-			}
-
-			/**
-			 * Filter to allow third party plugins to set the email blacklist validation.
-			 *
-			 * @since 2.5.1
-			 * @param bool   $validation_message The custom validation method.
-			 * @param array  $field              The Field Object.
-			 * @param string $email              The email entered in the input.
-			 * @param array  $blacklist          List of the blocked emailed/domains.
-			 */
-			$field['validation_message'] = apply_filters( 'gf_blacklist_validation_message', $validation_message, $field, $email, $domain, $tld, $blacklist );
 		}
 
+		// Update the form object in the validation result and return.
 		$validation_result['form'] = $form;
 		return $validation_result;
+	}
+
+	/**
+	 * Check if the email should be blacklisted based on form settings.
+	 *
+	 * @param bool   $is_valid Whether the field passes validation.
+	 * @param object $field    The field object.
+	 * @param string $email    The email address.
+	 * @param string $domain   The email domain.
+	 * @param string $tld      The email TLD.
+	 * @param string $blacklist The email blacklist.
+	 *
+	 * @return bool Whether the field passes blacklist validation.
+	 */
+	public function is_email_blacklisted( $is_valid, $field, $email, $domain, $tld, $blacklist ) {
+
+		// Short-circuit filter for third-party plugins.
+		if ( apply_filters( 'gf_blacklist_validation_short_circuit', false, $field, $email, $domain, $tld, $blacklist ) ) {
+			return true;
+		}
+
+		// Skip if 'none' is set.
+		if ( 'none' === $this->gf_emailblacklist_clean( $blacklist ) ) {
+			return true;
+		}
+
+		// Create the blacklist array from string if needed and clean it.
+		$blacklist = is_array( $blacklist ) ? $blacklist : explode( ',', $blacklist );
+		$blacklist = array_map( array( $this, 'gf_emailblacklist_clean' ), $blacklist );
+		$blacklist = array_filter( $blacklist );
+
+		// Skip if the blacklist is empty.
+		if ( empty( $blacklist ) ) {
+			return true;
+		}
+
+		// Create patterns from the blacklist and clean up the email username.
+		$blacklist_patterns = array_map( array( $this, 'gf_emailblacklist_pattern' ), $blacklist );
+
+		// Remove periods from the username part of the email since they all point to the same email address.
+		$user  = $this->gf_emailblacklist_clean( rgar( explode( '@', $email ), 0 ) );
+		$user  = str_replace( '.', '', $user );
+		$email = $user . '@' . $domain;
+
+		// Check the email against the blacklist patterns.
+		foreach ( $blacklist_patterns as $pattern ) {
+			if ( preg_match( $pattern, $email ) ) {
+				return false; // Match found, return false to indicate blacklist.
+			}
+		}
+
+		// No match found, pass the validation.
+		return true;
 	}
 
 	/**
@@ -392,8 +388,8 @@ class GFEmailBlacklist extends GFAddOn {
 	 * @return string A regex pattern.
 	 */
 	protected function gf_emailblacklist_pattern( $email ) {
-		
-		if( str_contains( $email, '@' ) ) {
+
+		if ( str_contains( $email, '@' ) ) {
 			$array  = explode( '@', $email );
 			$user   = $array[0];
 			$domain = $array[1];
@@ -403,8 +399,12 @@ class GFEmailBlacklist extends GFAddOn {
 		}
 
 		// Avoid special characters in the email.
-		if ( preg_match( '/[^a-zA-ZÀ-ÖØ-öø-ÿ0-9_\+\-\.\*]/', $user ) ) return false;
-		if ( preg_match( '/[^a-zA-ZÀ-ÖØ-öø-ÿ0-9_\-\.\*]/', $domain ) ) return false;
+		if ( preg_match( '/[^a-zA-ZÀ-ÖØ-öø-ÿ0-9_\+\-\.\*]/', $user ) ) {
+			return false;
+		}
+		if ( preg_match( '/[^a-zA-ZÀ-ÖØ-öø-ÿ0-9_\-\.\*]/', $domain ) ) {
+			return false;
+		}
 
 		// Remove periods from username.
 		$user = str_replace( '.', '', $user );
@@ -416,7 +416,7 @@ class GFEmailBlacklist extends GFAddOn {
 		$pattern = str_replace( '-', '\-', $pattern );
 		$pattern = str_replace( '.', '\.', $pattern );
 		$pattern = str_replace( '*', '.*?', $pattern );
-		
+
 		return $pattern;
 	}
 
@@ -427,9 +427,6 @@ class GFEmailBlacklist extends GFAddOn {
 	 */
 	public function get_menu_icon() {
 
-		return file_get_contents( plugin_dir_url( __FILE__ ). '/assets/blacklist-icon.svg' );
-
+		return file_get_contents( plugin_dir_url( __FILE__ ) . '/assets/blacklist-icon.svg' );
 	}
-
-
 }
