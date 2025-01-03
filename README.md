@@ -51,6 +51,82 @@ These settings apply only to the selected form and override the global blacklist
 - [Gravity Forms Documentation - Email Input Fields](https://docs.gravityforms.com/email/)
 - [Gravity Forms Documentation - Fighting Spam](https://docs.gravityforms.com/spam/)
 
+## Developer Resources
+
+### Filter: `gf_blacklist_validation_message`
+
+This filter lets you customize the error message shown to users if their email is blacklisted based on form or field settings.
+
+#### Parameters
+
+* `$validation_message` (string): The error message to display.
+* `$field` (object): The Gravity Forms field object.
+* `$email` (string): The full email address being validated.
+* `$domain` (string): The domain part of the email address.
+* `$tld` (string): The top-level domain (TLD) of the email address.
+* `$blacklist` (string): A comma-separated list of blacklisted emails.
+
+#### Returns
+
+(string): The error message displayed when the email is blacklisted.
+
+---
+
+### Filter: `gf_blacklist_is_valid`
+
+This filter lets you determine whether an email passes blacklist validation during form submission.
+
+#### Parameters
+
+* `$is_valid` (bool): Indicates if the email passes validation (*default:* **FALSE**).
+* `$field` (object): The Gravity Forms field object.
+* `$email` (string): The full email address being validated.
+* `$domain` (string): The domain part of the email address.
+* `$tld` (string): The top-level domain (TLD) of the email address.
+* `$blacklist` (string): A comma-separated list of blacklisted emails.
+
+#### Returns
+
+(bool): **TRUE** if the email is valid and not blacklisted; **FALSE** otherwise.
+
+---
+
+### Filter: `gf_blacklist_is_spam`
+
+This filter lets you determine if a form entry should be flagged as spam based on email validation.
+
+#### Parameters
+
+* `$is_valid` (bool): Indicates if the email passes spam validation (*default:* **FALSE**).
+* `$field` (object): The Gravity Forms field object.
+* `$email` (string): The full email address being validated.
+* `$domain` (string): The domain part of the email address.
+* `$tld` (string): The top-level domain (TLD) of the email address.
+* `$blacklist` (string): A comma-separated list of blacklisted emails.
+
+#### Returns
+
+(bool): **TRUE** if the email is valid and not flagged as spam; **FALSE** otherwise.
+
+---
+
+### Filter: `gf_blacklist_validation_short_circuit`
+
+This filter lets you bypass the email blacklist validation process entirely for specific cases.
+
+#### Parameters
+
+* `$skip` (bool): Set to **TRUE** to skip blacklist validation (*default:* **FALSE**).
+* `$field` (object): The Gravity Forms field object.
+* `$email` (string): The full email address being validated.
+* `$domain` (string): The domain part of the email address.
+* `$tld` (string): The top-level domain (TLD) of the email address.
+* `$blacklist` (string): A comma-separated list of blacklisted emails.
+
+#### Returns
+
+(bool): **FALSE** if the validation process was not skipped.
+
 ## Changelog
 
 ### 2.7.0
