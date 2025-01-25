@@ -375,7 +375,12 @@ class GFEmailBlacklist extends GFAddOn {
 			$is_spam = ! apply_filters( 'gf_blacklist_is_spam', false, $field, $email, $domain, $tld, $blacklist );
 
 			if ( $is_spam && method_exists( 'GFCommon', 'set_spam_filter' ) ) {
-				GFCommon::set_spam_filter( rgar( $form, 'id' ), 'Gravity Forms Email Blacklist', 'The email address ' . $email . ' is blacklisted.' );
+				GFCommon::set_spam_filter(
+					rgar( $form, 'id' ),
+					__( 'Gravity Forms Email Blacklist', 'gravity-forms-email-blacklist' ),
+					/* translators: The placeholder is the email address. */
+					sprintf( __( 'The email address %s is blacklisted.', 'gravity-forms-email-blacklist' ), $email )
+				);
 			}
 		}
 
