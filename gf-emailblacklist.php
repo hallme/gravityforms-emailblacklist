@@ -49,6 +49,6 @@ function gf_email_blacklist_addon() {
  * @return void
  */
 function gf_email_blacklist_plugin_textdomain() {
-	load_plugin_textdomain( 'gravity-forms-email-blacklist', false, basename( dirname( __FILE__ ) ) . '/languages/' );
+	load_plugin_textdomain( 'gravity-forms-email-blacklist', false, basename( __DIR__ ) . '/languages/' );
 }
 add_action( 'init', 'gf_email_blacklist_plugin_textdomain' );

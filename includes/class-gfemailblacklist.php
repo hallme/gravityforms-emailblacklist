@@ -94,7 +94,6 @@ class GFEmailBlacklist extends GFAddOn {
 		add_filter( 'gf_blacklist_is_valid', array( $this, 'is_email_blacklisted' ), 10, 6 );
 		add_filter( 'gform_entry_is_spam', array( $this, 'mark_as_spam' ), 10, 3 );
 		add_filter( 'gf_blacklist_is_spam', array( $this, 'is_email_blacklisted' ), 10, 6 );
-
 	}
 
 	/**
@@ -348,9 +347,9 @@ class GFEmailBlacklist extends GFAddOn {
 		}
 
 		// Get the global settings.
-		$global_settings            = $this->get_global_settings();
-		$default_blacklist          = $global_settings['default_emailblacklist'];
-		$default_handling           = $global_settings['default_emailblacklist_handling'];
+		$global_settings   = $this->get_global_settings();
+		$default_blacklist = $global_settings['default_emailblacklist'];
+		$default_handling  = $global_settings['default_emailblacklist_handling'];
 
 		foreach ( $form['fields'] as &$field ) {
 
