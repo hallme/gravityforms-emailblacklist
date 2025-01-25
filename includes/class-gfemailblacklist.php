@@ -159,6 +159,15 @@ class GFEmailBlacklist extends GFAddOn {
 				'default_emailblacklist_handling'  => 'error',
 			)
 		);
+		if ( ! isset( $global_settings['default_emailblacklist'] ) ) {
+			$global_settings['default_emailblacklist'] = '';
+		}
+		if ( ! isset( $global_settings['default_emailblacklist_error_msg'] ) ) {
+			$global_settings['default_emailblacklist_error_msg'] = '';
+		}
+		if ( ! isset( $global_settings['default_emailblacklist_handling'] ) ) {
+			$global_settings['default_emailblacklist_handling'] = 'error';
+		}
 		return $global_settings;
 	}
 
@@ -362,7 +371,7 @@ class GFEmailBlacklist extends GFAddOn {
 			$email  = $this->gf_emailblacklist_clean( rgar( $entry, $field->id ) );
 			$domain = $this->gf_emailblacklist_clean( rgar( explode( '@', $email ), 1 ) );
 			$tld    = strrchr( $domain, '.' );
-			
+
 			$is_spam = ! apply_filters( 'gf_blacklist_is_spam', false, $field, $email, $domain, $tld, $blacklist );
 
 			if ( $is_spam && method_exists( 'GFCommon', 'set_spam_filter' ) ) {
