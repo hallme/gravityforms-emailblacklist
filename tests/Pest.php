@@ -39,7 +39,61 @@ expect()->extend('toBeOne', function () {
 |
 */
 
-function something()
-{
-    // ..
+define( 'ABSPATH', dirname( __DIR__ ) . '/' );
+
+class GFForms {
+	public static function include_addon_framework() {
+	}
+}
+class GFAddOn {
+}
+
+require_once dirname( __DIR__ ) . '/includes/class-gfemailblacklist.php';
+
+
+if ( ! function_exists( "rgar" ) ) {
+
+	/**
+	 * Get a specific property of an array without needing to check if that property exists.
+	 *
+	 * Provide a default value if you want to return a specific value if the property is not set.
+	 *
+	 * @since  Unknown
+	 * @access public
+	 *
+	 * @param array  $array   Array from which the property's value should be retrieved.
+	 * @param string $prop    Name of the property to be retrieved.
+	 * @param string $default Optional. Value that should be returned if the property is not set or empty. Defaults to null.
+	 *
+	 * @return null|string|mixed The value
+	 */
+	function rgar( $array, $prop, $default = null ) {
+
+		if ( ! is_array( $array ) && ! ( is_object( $array ) && $array instanceof ArrayAccess ) ) {
+			return $default;
+		}
+
+		if ( isset( $array[ $prop ] ) ) {
+			$value = $array[ $prop ];
+		} else {
+			$value = '';
+		}
+
+		return empty( $value ) && $default !== null ? $default : $value;
+	}
+}
+
+function apply_filters( $tag, $value, $arg = null ) {
+	return $value;
+}
+
+function test_email_validation( $blacklist, $email ) {
+	$gfemailblacklist = new GFEMailBlacklist();
+
+	// Extract the email input and parse email components.
+	$email  = $gfemailblacklist->gf_emailblacklist_clean( $email );
+	$domain = $gfemailblacklist->gf_emailblacklist_clean( rgar( explode( '@', $email ), 1 ) );
+	$tld    = strrchr( $domain, '.' );
+
+	return $gfemailblacklist->is_email_blacklisted(false, null, $email, $domain, $tld, $blacklist);
 }

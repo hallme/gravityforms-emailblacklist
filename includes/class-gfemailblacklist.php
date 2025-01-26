@@ -465,7 +465,7 @@ class GFEmailBlacklist extends GFAddOn {
 	 * @param string $string A string to sanitize.
 	 * @return string Sanitize string
 	 */
-	protected function gf_emailblacklist_clean( $string ) {
+	public function gf_emailblacklist_clean( $string ) {
 		return strtolower( trim( $string ) );
 	}
 
