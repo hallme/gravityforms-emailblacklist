@@ -61,6 +61,13 @@ class GFEmailBlacklist extends GFAddOn {
 	protected $_capabilities = array( 'gravityforms_email_blacklist', 'gravityforms_email_blacklist_uninstall' );
 
 
+	/**
+	 * The single instance of the class.
+	 *
+	 * @since  1.0.0
+	 * @access private
+	 * @var    GFEmailBlacklist $_instance The single instance of the class.
+	 */
 	private static $_instance = null;
 
 	/**
@@ -400,7 +407,20 @@ class GFEmailBlacklist extends GFAddOn {
 	 */
 	public function is_email_blacklisted( $is_valid, $field, $email, $domain, $tld, $blacklist ) {
 
-		// Short-circuit filter for third-party plugins.
+		/**
+		 * Short-circuit filter for third-party plugins.
+		 *
+		 * @since  1.0.0
+		 *
+		 * @param bool   $short_circuit Whether to short-circuit the field validation.
+		 * @param object $field    The field object.
+		 * @param string $email    The email address.
+		 * @param string $domain   The email domain.
+		 * @param string $tld      The email TLD.
+		 * @param string $blacklist The email blacklist.
+		 *
+		 * @return bool Whether the field passes blacklist validation.
+		 */
 		if ( apply_filters( 'gf_blacklist_validation_short_circuit', false, $field, $email, $domain, $tld, $blacklist ) ) {
 			return true;
 		}
