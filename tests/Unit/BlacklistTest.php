@@ -15,6 +15,13 @@ test('single domain', function () {
 	expect(test_email_validation( $blacklist, 'example@example.com' ))->toBe(false);
 });
 
+test('single domain alterative syntax', function () {
+	$blacklist = '*@example.com';
+
+	expect(test_email_validation( $blacklist, 'test@test.com' ))->toBe(true);
+	expect(test_email_validation( $blacklist, 'example@example.com' ))->toBe(false);
+});
+
 test('multiple domains', function () {
 	$blacklist = 'example.com,test.com';
 
@@ -48,4 +55,88 @@ test('single email', function () {
 	expect(test_email_validation( $blacklist, 'jsmith@crosspeaksoftware.com' ))->toBe(false);
 	expect(test_email_validation( $blacklist, 'jdoe@crosspeaksoftware.com' ))->toBe(true);
 	expect(test_email_validation( $blacklist, 'test@example.com' ))->toBe(true);
+});
+
+test('weird case emails', function () {
+	$blacklist = 'JSMITH@crosspeaksoftware.com';
+
+	expect(test_email_validation( $blacklist, 'jsmith@crosspeaksoftware.com' ))->toBe(false);
+	expect(test_email_validation( $blacklist, 'jsmith@CROSSPEAKSOFTWARE.com' ))->toBe(false);
+	expect(test_email_validation( $blacklist, 'jsMith@CROSSPEAKsoftware.COM ' ))->toBe(false);
+	expect(test_email_validation( $blacklist, 'jdoe@crosspeaksoftware.com' ))->toBe(true);
+});
+
+test('multiple emails', function () {
+	$blacklist = 'jsmith@crosspeaksoftware.com, jdoe@crosspeaksoftware.com';
+
+	expect(test_email_validation( $blacklist, 'jsmith@crosspeaksoftware.com' ))->toBe(false);
+	expect(test_email_validation( $blacklist, 'jdoe@crosspeaksoftware.com' ))->toBe(false);
+	expect(test_email_validation( $blacklist, 'jsmith@crosspeaksoftware.co' ))->toBe(true);
+	expect(test_email_validation( $blacklist, 'jdoe@crosspeaksoftware.co' ))->toBe(true);
+});
+
+test('multiple emails with wildcard', function () {
+	$blacklist = 'jsmith@crosspeaksoftware.com, jdoe@*';
+
+	expect(test_email_validation( $blacklist, 'jsmith@crosspeaksoftware.com' ))->toBe(false);
+	expect(test_email_validation( $blacklist, 'jdoe@crosspeaksoftware.com' ))->toBe(false);
+	expect(test_email_validation( $blacklist, 'jdoe@crosspeaksoftware.us' ))->toBe(false);
+	expect(test_email_validation( $blacklist, 'jdoe@crosspeaksoftware.co.uk' ))->toBe(false);
+	expect(test_email_validation( $blacklist, 'jdoe@crosspeaksoftware.com.au' ))->toBe(false);
+	expect(test_email_validation( $blacklist, 'jdoe@crosspeaksoftware.ca' ))->toBe(false);
+	expect(test_email_validation( $blacklist, 'jdoe@crosspeaksoftware.de' ))->toBe(false);
+	expect(test_email_validation( $blacklist, 'jdoe@crosspeaksoftware.co.jp' ))->toBe(false);
+	expect(test_email_validation( $blacklist, 'jdoe@example.com' ))->toBe(false);
+});
+
+test('wildcard in middle of blacklist', function () {
+	$blacklist = 'jsmith*@crosspeaksoftware.com';
+
+	expect(test_email_validation( $blacklist, 'jsmith@crosspeaksoftware.com' ))->toBe(false);
+	expect(test_email_validation( $blacklist, 'jsmith2425@crosspeaksoftware.com' ))->toBe(false);
+	expect(test_email_validation( $blacklist, 'jsmith_test@crosspeaksoftware.com' ))->toBe(false);
+	expect(test_email_validation( $blacklist, 'jsmit@crosspeaksoftware.com' ))->toBe(true);
+	expect(test_email_validation( $blacklist, 'jsmit@crosspeaksoftware.co' ))->toBe(true);
+	expect(test_email_validation( $blacklist, 'jdoe@crosspeaksoftware.co' ))->toBe(true);
+});
+
+test('wildcard at end of blacklist', function () {
+	$blacklist = 'jsmith@crosspeaksoftware.com*';
+
+	expect(test_email_validation( $blacklist, 'jsmith@crosspeaksoftware.com' ))->toBe(false);
+	expect(test_email_validation( $blacklist, 'jsmith@crosspeaksoftware.com.au' ))->toBe(false);
+	expect(test_email_validation( $blacklist, 'jsmith@crosspeaksoftware.ca' ))->toBe(true);
+	expect(test_email_validation( $blacklist, 'jsmith@crosspeaksoftware.de' ))->toBe(true);
+	expect(test_email_validation( $blacklist, 'jdoe@crosspeaksoftware.co.jp' ))->toBe(true);
+});
+
+test('wildcard at beginning of blacklist', function () {
+	$blacklist = '*@crosspeaksoftware.com';
+
+	expect(test_email_validation( $blacklist, 'jsmith@crosspeaksoftware.com' ))->toBe(false);
+	expect(test_email_validation( $blacklist, 'jdoe@crosspeaksoftware.com' ))->toBe(false);
+	expect(test_email_validation( $blacklist, 'jsmith@crosspeaksoftware.com.au' ))->toBe(true);
+	expect(test_email_validation( $blacklist, 'jsmith@crosspeaksoftware.ca' ))->toBe(true);
+	expect(test_email_validation( $blacklist, 'jsmith@crosspeaksoftware.de' ))->toBe(true);
+	expect(test_email_validation( $blacklist, 'jdoe@crosspeaksoftware.co.jp' ))->toBe(true);
+});
+
+test('wildcard at beginning and end of blacklist', function () {
+	$blacklist = '*@crosspeaksoftware.com*';
+
+	expect(test_email_validation( $blacklist, 'jsmith@crosspeaksoftware.com' ))->toBe(false);
+	expect(test_email_validation( $blacklist, 'jdoe@crosspeaksoftware.com' ))->toBe(false);
+	expect(test_email_validation( $blacklist, 'jsmith@crosspeaksoftware.com.au' ))->toBe(false);
+	expect(test_email_validation( $blacklist, 'jsmith@crosspeaksoftware.ca' ))->toBe(true);
+	expect(test_email_validation( $blacklist, 'jdoe@crosspeaksoftware.co.jp' ))->toBe(true);
+});
+
+test('wildcard at beginning and end of blacklist with email', function () {
+	$blacklist = '*@crosspeaksoftware.com, jsmith@crosspeaksoftware.com*';
+
+	expect(test_email_validation( $blacklist, 'jdoe@crosspeaksoftware.com' ))->toBe(false);
+	expect(test_email_validation( $blacklist, 'jsmith@crosspeaksoftware.com' ))->toBe(false);
+	expect(test_email_validation( $blacklist, 'jsmith@crosspeaksoftware.com.au' ))->toBe(false);
+	expect(test_email_validation( $blacklist, 'jdoe@crosspeaksoftware.com.au' ))->toBe(true);
+	expect(test_email_validation( $blacklist, 'jsmith@crosspeaksoftware.ca' ))->toBe(true);
 });
