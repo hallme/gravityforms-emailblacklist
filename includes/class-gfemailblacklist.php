@@ -98,9 +98,9 @@ class GFEmailBlacklist extends GFAddOn {
 	public function init_frontend() {
 		parent::init_frontend();
 		add_filter( 'gform_validation', array( $this, 'email_blacklist_validation' ), 10, 2 );
-		add_filter( 'gf_blacklist_is_valid', array( $this, 'is_email_blacklisted' ), 10, 6 );
+		add_filter( 'gf_blacklist_is_valid', array( $this, 'is_email_valid' ), 10, 6 );
 		add_filter( 'gform_entry_is_spam', array( $this, 'mark_as_spam' ), 10, 3 );
-		add_filter( 'gf_blacklist_is_spam', array( $this, 'is_email_blacklisted' ), 10, 6 );
+		add_filter( 'gf_blacklist_is_spam', array( $this, 'is_email_valid' ), 10, 6 );
 	}
 
 	/**
@@ -394,7 +394,7 @@ class GFEmailBlacklist extends GFAddOn {
 	}
 
 	/**
-	 * Check if the email should be blacklisted based on form settings.
+	 * Check if the email is valid given the blacklist.
 	 *
 	 * @param bool   $is_valid Whether the field passes validation.
 	 * @param object $field    The field object.
@@ -405,7 +405,7 @@ class GFEmailBlacklist extends GFAddOn {
 	 *
 	 * @return bool Whether the field passes blacklist validation.
 	 */
-	public function is_email_blacklisted( $is_valid, $field, $email, $domain, $tld, $blacklist ) {
+	public function is_email_valid( $is_valid, $field, $email, $domain, $tld, $blacklist ) {
 
 		/**
 		 * Short-circuit filter for third-party plugins.

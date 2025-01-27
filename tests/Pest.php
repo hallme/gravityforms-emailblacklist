@@ -95,5 +95,5 @@ function test_email_validation( $blacklist, $email ) {
 	$domain = $gfemailblacklist->gf_emailblacklist_clean( rgar( explode( '@', $email ), 1 ) );
 	$tld    = strrchr( $domain, '.' );
 
-	return $gfemailblacklist->is_email_blacklisted(false, null, $email, $domain, $tld, $blacklist);
+	return $gfemailblacklist->is_email_valid(false, null, $email, $domain, $tld, $blacklist);
 }
