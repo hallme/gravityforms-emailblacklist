@@ -1,0 +1,48 @@
+stages:
+    - test
+
+phperrors:
+    stage: test
+    image: registry.gitlab.com/hallme/docker/php:latest
+    script:
+        # Test PHP 7.0 Errors
+        - php70 --version
+        - find -L . -name '*.php' -not -path "./vendor/*" -not -path "./tests/*" -print0 | xargs -0 -n 1 -P 4 php70 -l
+        # Test PHP 7.1 Errors
+        - php71 --version
+        - find -L . -name '*.php' -not -path "./vendor/*" -not -path "./tests/*" -print0 | xargs -0 -n 1 -P 4 php71 -l
+        # Test PHP 7.2 Errors
+        - php72 --version
+        - find -L . -name '*.php' -not -path "./vendor/*" -not -path "./tests/*" -print0 | xargs -0 -n 1 -P 4 php72 -l
+        # Test PHP 7.3 Errors
+        - php73 --version
+        - find -L . -name '*.php' -not -path "./vendor/*" -not -path "./tests/*" -print0 | xargs -0 -n 1 -P 4 php73 -l
+        # Test PHP 7.4 Errors
+        - php74 --version
+        - find -L . -name '*.php' -not -path "./vendor/*" -not -path "./tests/*" -print0 | xargs -0 -n 1 -P 4 php74 -l
+        # Test PHP 8.0 Errors
+        - php80 --version
+        - find -L . -name '*.php' -not -path "./vendor/*"  -print0 | xargs -0 -n 1 -P 4 php80 -l
+        # Test PHP 8.1 Errors
+        - php81 --version
+        - find -L . -name '*.php' -not -path "./vendor/*"  -print0 | xargs -0 -n 1 -P 4 php81 -l
+        # Test PHP 8.2 Errors
+        - php82 --version
+        - find -L . -name '*.php' -not -path "./vendor/*"  -print0 | xargs -0 -n 1 -P 4 php82 -l
+        # Test PHP 8.3 Errors
+        - php83 --version
+        - find -L . -name '*.php' -not -path "./vendor/*"  -print0 | xargs -0 -n 1 -P 4 php83 -l
+        # PHPCS testing - disabled for not since it doesn't pass yet
+        # - php83 /usr/bin/phpcs
+    except:
+        - main
+
+pest:
+    stage: test
+    image: registry.gitlab.com/hallme/docker/php:latest
+    script:
+        - php --version
+        - composer install
+        - vendor/bin/pest
+    except:
+        - main
