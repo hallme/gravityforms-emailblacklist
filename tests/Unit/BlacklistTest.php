@@ -140,3 +140,66 @@ test('wildcard at beginning and end of blacklist with email', function () {
 	expect(test_email_validation( $blacklist, 'jdoe@crosspeaksoftware.com.au' ))->toBe(true);
 	expect(test_email_validation( $blacklist, 'jsmith@crosspeaksoftware.ca' ))->toBe(true);
 });
+
+test('empty and invalid email addresses', function () {
+	$blacklist = 'example.com';
+
+	expect(test_email_validation($blacklist, ''))->toBe(true);
+	expect(test_email_validation($blacklist, ' '))->toBe(true);
+	expect(test_email_validation($blacklist, 'notanemail'))->toBe(true);
+	expect(test_email_validation($blacklist, '@.com'))->toBe(true);
+	expect(test_email_validation($blacklist, '@example.com'))->toBe(false);
+});
+
+test('special characters in email addresses', function () {
+	$blacklist = 'example.com';
+
+	expect(test_email_validation($blacklist, 'user+tag@example.com'))->toBe(false);
+	expect(test_email_validation($blacklist, 'user.name@example.com'))->toBe(false);
+	expect(test_email_validation($blacklist, 'user-name@example.com'))->toBe(false);
+	expect(test_email_validation($blacklist, 'user_name@example.com'))->toBe(false);
+});
+
+test('whitespace handling', function () {
+	$blacklist = ' example.com , test.com ';
+
+	expect(test_email_validation($blacklist, 'user@example.com'))->toBe(false);
+	expect(test_email_validation($blacklist, 'user@test.com'))->toBe(false);
+	expect(test_email_validation($blacklist, 'user@other.com'))->toBe(true);
+});
+
+
+test('multiple wildcards in pattern', function () {
+	$blacklist = '*spam*@*.com';
+
+	expect(test_email_validation($blacklist, 'spam@example.com'))->toBe(false);
+	expect(test_email_validation($blacklist, 'myspam@example.com'))->toBe(false);
+	expect(test_email_validation($blacklist, 'spamtest@example.com'))->toBe(false);
+	expect(test_email_validation($blacklist, 'myspamtest@example.com'))->toBe(false);
+	expect(test_email_validation($blacklist, 'normal@example.com'))->toBe(true);
+});
+
+test('domain case sensitivity', function () {
+	$blacklist = 'Example.Com';
+
+	expect(test_email_validation($blacklist, 'user@example.com'))->toBe(false);
+	expect(test_email_validation($blacklist, 'user@EXAMPLE.COM'))->toBe(false);
+	expect(test_email_validation($blacklist, 'user@Example.Com'))->toBe(false);
+	expect(test_email_validation($blacklist, 'user@Example1.Com'))->toBe(true);
+});
+
+test('malformed blacklist entries', function () {
+	$blacklist = '@example.com,,test.com,@,.com,*@*';
+
+	expect(test_email_validation($blacklist, 'user@example.com'))->toBe(false);
+	expect(test_email_validation($blacklist, 'user@test.com'))->toBe(false);
+	expect(test_email_validation($blacklist, 'user@valid.com'))->toBe(false); // Due to *@*
+});
+
+test('long email addresses', function () {
+	$blacklist = 'verylongdomain.com';
+	$longLocalPart = str_repeat('a', 64); // Maximum local part length
+
+	expect(test_email_validation($blacklist, $longLocalPart . '@verylongdomain.com'))->toBe(false);
+	expect(test_email_validation($blacklist, $longLocalPart . '@other.com'))->toBe(true);
+});
